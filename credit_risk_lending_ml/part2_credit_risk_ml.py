@@ -1110,167 +1110,61 @@ subgroup_display.to_csv(
 
 print("Thin-file bias analysis saved.")
 
+from sklearn.metrics import RocCurveDisplay
+RocCurveDisplay.from_predictions(y_test, y_prob_logistic)
+plt.savefig("roc_curve.png")
+
+tier_summary["actual_default_rate"] = pricing_df.groupby("risk_tier")["actual_default"].mean() * 100
+
+from sklearn.preprocessing import StandardScaler
+X_anomaly_scaled = StandardScaler().fit_transform(X_anomaly)
+isolation_forest.fit(X_anomaly_scaled)
+
 import os
 
+bias_note = """
+# Bias Awareness and Human Oversight
+
+## Potential Proxy Bias
+
+The credit-risk model does not directly include protected characteristics such as gender or location. However, some of the variables used by the model could act as indirect proxies for characteristics that may be correlated with socioeconomic or demographic groups. For example, employment_type may be associated with different socioeconomic circumstances or geographic labour-market patterns. Monthly income can also reflect unequal access to employment opportunities and may correlate with location or other demographic characteristics. Similarly, credit_bureau_score can reflect differences in access to formal credit and therefore may disadvantage applicants who are new to credit or have limited credit histories.
+
+The thin-file population requires particular attention. Applicants with missing credit bureau scores should not automatically be treated as higher-risk simply because they have less traditional credit history. The model deliberately uses UPI inflow and other alternative signals so that applicants can still be assessed when bureau information is unavailable, but this does not eliminate the possibility of indirect bias.
+
+## Human Oversight and Governance
+
+Before deployment, model performance should be monitored across relevant applicant segments, including thin-file status and employment type. Approval and decline rates, default rates, false-positive rates, and model performance should be reviewed periodically to identify potentially unfair outcomes.
+
+A concrete safeguard should be introduced: **a human reviewer should double-check any thin-file applicant who receives a decline recommendation before the decision becomes final.** Borderline or unusually high-risk decisions should also be eligible for human review. Model thresholds should be reviewed periodically, and the model should not be deployed permanently without ongoing fairness, performance, and outcome monitoring.
+
+Human oversight is therefore an important control alongside the model rather than a replacement for the model.
+"""
+
+# Create the directory if it doesn't exist
 os.makedirs("credit_risk_lending_ml", exist_ok=True)
 
-print("Folder created.")
+with open(
+    "credit_risk_lending_ml/bias_awareness.md",
+    "w",
+    encoding="utf-8"
+) as f:
+    f.write(bias_note)
 
-import matplotlib.pyplot as plt
+print("Created: bias_awareness.md")
+print("Word count:", len(bias_note.split()))
 
-default_counts = df["default"].value_counts().sort_index()
+# Display the actual model comparison table
+display(model_comparison)
 
-plt.figure(figsize=(7, 5))
+import os
 
-plt.bar(
-    ["No Default", "Default"],
-    default_counts.values
+print(
+    "Root README exists:",
+    os.path.exists("README.md")
 )
 
-plt.title("Default Distribution")
-plt.xlabel("Default Status")
-plt.ylabel("Number of Applicants")
+with open("README.md", "w", encoding="utf-8") as f:
+    f.write("# Payments & Fraud Analytics Project\n\n")
 
-plt.tight_layout()
-
-plt.savefig(
-    "credit_risk_lending_ml/default_distribution.png",
-    dpi=300,
-    bbox_inches="tight"
-)
-
-plt.show()
-plt.close()
-
-print("Saved: default_distribution.png")
-
-df["is_thin_file"]
-
-thin_counts = df["is_thin_file"].value_counts().sort_index()
-
-plt.figure(figsize=(7, 5))
-
-plt.bar(
-    ["Non-Thin-File", "Thin-File"],
-    thin_counts.values
-)
-
-plt.title("Thin-File Applicant Distribution")
-plt.xlabel("Applicant Type")
-plt.ylabel("Number of Applicants")
-
-plt.tight_layout()
-
-plt.savefig(
-    "credit_risk_lending_ml/thin_file_distribution.png",
-    dpi=300,
-    bbox_inches="tight"
-)
-
-plt.show()
-plt.close()
-
-print("Saved: thin_file_distribution.png")
-
-model_comparison
-
-comparison_plot
-
-plt.show()
-
-metrics = [
-    "Accuracy",
-    "Precision",
-    "Recall",
-    "F1",
-    "ROC_AUC"
-]
-
-comparison_plot = (
-    model_comparison
-    .set_index("Model")[metrics]
-)
-
-plt.figure(figsize=(10, 6))
-
-comparison_plot.plot(
-    kind="bar",
-    figsize=(10, 6)
-)
-
-plt.title("Credit Risk Model Comparison")
-plt.ylabel("Score")
-plt.ylim(0, 1)
-plt.xticks(rotation=0)
-plt.legend(title="Metric")
-
-plt.tight_layout()
-
-plt.savefig(
-    "credit_risk_lending_ml/model_comparison.png",
-    dpi=300,
-    bbox_inches="tight"
-)
-
-plt.show()
-plt.close()
-
-print("Saved: model_comparison.png")
-
-tier_summary
-
-plt.figure(figsize=(8, 5))
-
-plt.bar(
-    tier_summary["risk_tier"].astype(str),
-    tier_summary["avg_default_probability"]
-)
-
-plt.title("Average Default Probability by Risk Tier")
-plt.xlabel("Risk Tier")
-plt.ylabel("Average Predicted Default Probability (%)")
-
-plt.tight_layout()
-
-plt.savefig(
-    "credit_risk_lending_ml/risk_tier_default_rate.png",
-    dpi=300,
-    bbox_inches="tight"
-)
-
-plt.show()
-plt.close()
-
-print("Saved: risk_tier_default_rate.png")
-
-anomaly_counts = behaviour[
-    "predicted_anomaly"
-].value_counts().sort_index()
-
-plt.figure(figsize=(7, 5))
-
-plt.bar(
-    ["Normal", "Detected Anomaly"],
-    [
-        anomaly_counts.get(0, 0),
-        anomaly_counts.get(1, 0)
-    ]
-)
-
-plt.title("Isolation Forest Anomaly Detection")
-plt.xlabel("Classification")
-plt.ylabel("Number of Transactions")
-
-plt.tight_layout()
-
-plt.savefig(
-    "credit_risk_lending_ml/anomaly_detection.png",
-    dpi=300,
-    bbox_inches="tight"
-)
-
-plt.show()
-plt.close()
-
-print("Saved: anomaly_detection.png")
+print("README.md created successfully.")
 
