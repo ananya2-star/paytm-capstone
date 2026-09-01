@@ -175,8 +175,6 @@ See `bias_awareness.md` for the full discussion.
 
 The final deployment recommendation is based on the actual model-performance results produced by the analysis.
 
-**[INSERT YOUR FINAL 3–5 SENTENCE MODEL RECOMMENDATION HERE AFTER THE FINAL MODEL RUN.]**
-
 The recommendation should specifically reference the final ROC-AUC and F1 values of both models and explain why the selected model is preferable for deployment.
 
 ---
