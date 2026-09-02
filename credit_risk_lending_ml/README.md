@@ -173,7 +173,7 @@ See `bias_awareness.md` for the full discussion.
 
 ## Final Model Recommendation
 
-We recommend **Logistic Regression** for deployment. It achieved a ROC-AUC of approximately **0.72**, compared with approximately **0.53** for the Decision Tree after removing the depth restriction. The higher ROC-AUC indicates that Logistic Regression provides better overall discrimination between default and non-default applicants in this dataset. Its probability outputs also directly support the risk-based pricing tiers used in the analysis. The model should be deployed with the bias-monitoring and human-review controls described above.
+We recommend **Logistic Regression** for deployment. It achieved a ROC-AUC of approximately **0.72**, compared with approximately **0.53** for the unconstrained Decision Tree. The higher ROC-AUC indicates that Logistic Regression provides better overall discrimination between default and non-default applicants in this dataset. Its probability outputs also directly support the risk-based pricing tiers used in the analysis. Deployment should remain subject to the bias-monitoring and human-review controls described in `bias_awareness.md`.
 
 ---
 
